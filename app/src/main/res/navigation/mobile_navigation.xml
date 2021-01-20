@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_profile">
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.android.woundmonitoringsystem.PatientProfile"
+        android:label="@string/menu_profile"
+        tools:layout="@layout/patient_profile_fragment" />
+
+    <fragment
+        android:id="@+id/nav_details"
+        android:name="com.android.woundmonitoringsystem.AllWounds"
+        android:label="@string/all_wound"
+        tools:layout="@layout/fragment_all_wounds" />
+
+    <fragment
+        android:id="@+id/nav_sense"
+        android:name="com.android.woundmonitoringsystem.Sensing"
+        android:label="@string/menu_sense"
+        tools:layout="@layout/sensing_fragment" />
+
+    <fragment
+        android:id="@+id/nav_suggestion"
+        android:name="com.android.woundmonitoringsystem.Suggestions"
+        android:label="@string/menu_suggestions"
+        tools:layout="@layout/fragment_suggestions" />
+
+    <fragment
+        android:id="@+id/nav_range"
+        android:name="com.android.woundmonitoringsystem.StandardValues"
+        android:label="@string/menu_range"
+        tools:layout="@layout/fragment_standard_values" />
+</navigation>

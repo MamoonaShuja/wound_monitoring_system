@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Wound Monitoring System</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Wound Monitoring System</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="nav_header_subtitle">Feasibility Report of Wound</string>
+    <string name="action_logout">Logout</string>
+
+    <string name="menu_profile">Patient Profile</string>
+    <string name="menu_details">Wound Profile</string>
+    <string name="menu_suggestions">Suggestions</string>
+    <string name="menu_range">Standard Values</string>
+    <string name="menu_sense">Sensing</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--    SignUp Activity-->
+    <string name="login">Login</string>
+    <string name="signup">Create Account</string>
+    <string name="email">Email</string>
+    <string name="pwd">Password</string>
+    <string name="age">Age</string>
+    <string name="gender">Gender</string>
+    <string name="region">Region</string>
+    <string name="name">Name</string>
+    <string name="create">Don\'t Have An account?</string>
+    <string name="create_acc"><u>SignUp Here</u></string>
+    <string name="login_acc"><u>Login Here</u></string>
+    <string name="already_acc">Already Have an Account?</string>
+
+    <!--    Wound Page-->
+    <string name="color">Color</string>
+    <string name="type">Type</string>
+    <string name="size">Size</string>
+    <string name="add">Add</string>
+    <string name="update">Update</string>
+    <string name="wound">View Wound Profile</string>
+    <string name="all_wound">All Wound Profiles</string>
+    <string name="add_wound">Add Wound Profile</string>
+    <string name="no_rec">No Record Found</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="wifi">Wifi</string>
+    <string name="in">Internal Sensing</string>
+    <string name="ex">External Sensing</string>
+    <string name="bd">Bluetooth Devices</string>
+    <string name="sav">Save</string>
+    <string name="res">Reset</string>
+    <string name="fes">Feasibility</string>
+
+<!--    Standards-->
+
+    <string name="bst">Standard Body Temperature Range</string>
+    <string name="std">Standard</string>
+    <string name="cel">Celsius</string>
+    <string name="hyp">Hypothermia</string>
+    <string name="nor">Normal</string>
+    <string name="fev">Fever/Hyperthermia</string>
+    <string name="hype">Hyperpyrexia</string>
+    <string name="cls">Class</string>
+    <!--    Url-->
+    <string name="url">http://coredev.codelab.pk/wms/api.php</string>
+</resources>

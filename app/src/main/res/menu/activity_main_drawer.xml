@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/patient_profile"
+            android:title="@string/menu_profile" />
+        <item
+            android:id="@+id/nav_details"
+            android:icon="@drawable/wound_profile"
+            android:title="@string/all_wound" />
+        <item
+            android:id="@+id/nav_sense"
+            android:icon="@drawable/ic_baseline_search_24"
+            android:title="@string/menu_sense" />
+        <item
+            android:id="@+id/nav_suggestion"
+            android:icon="@drawable/suggestions"
+            android:title="@string/menu_suggestions" />
+        <item
+            android:id="@+id/nav_range"
+            android:icon="@drawable/standard"
+            android:title="@string/menu_range" />
+    </group>
+</menu>
