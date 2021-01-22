@@ -74,6 +74,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
     private boolean isBtConnected = false;
     private boolean isExternal = false;
     private boolean isInternal = false;
+    private boolean isReset = false;
     DataInputStream is = null;
     RelativeLayout loading;
     JSONObject jsonBody;
@@ -141,6 +142,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
                         }
                     }else{
                         try {
+                            mConnectedThread.write("cmd1");
                             os.write("cmd1".getBytes(Charset.forName("UTF-8")));
                         } catch (Exception e) {
                             System.err.println("Can't send the data");
@@ -164,6 +166,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
                         }
                     } else {
                         try {
+                            mConnectedThread.write("cmd2");
                             os.write("cmd2".getBytes(Charset.forName("UTF-8")));
                         } catch (Exception e) {
                             System.err.println("Can't send the data");
@@ -189,7 +192,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
                         if (endOfLineIndex > 0) {                                            // if end-of-line,
                             String sbprint = sb.substring(0, endOfLineIndex);               // extract string
                             sb.delete(0, sb.length());                                      // and clear
-//                            Toast.makeText(getActivity(), sbprint , Toast.LENGTH_LONG).show();            // update TextView
+                            Toast.makeText(getActivity(), sbprint , Toast.LENGTH_LONG).show();            // update TextView
                             try {
                                 JSONObject jsonObject = new JSONObject(sbprint);
                                 if(isExternal) {
@@ -222,15 +225,23 @@ public class Sensing extends Fragment implements View.OnClickListener{
                                     outWidget.setVisibility(View.VISIBLE);
                                     loading.setVisibility(View.GONE);
                                     isInternal = false;
+                                }if(isReset){
+                                    String sts = jsonObject.getString("status");
+                                    if(sts.equals("ok")){
+                                        loading.setVisibility(View.GONE);
+                                        Toast.makeText(getActivity() , "Reset Successfully" , Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             } catch (JSONException e) {
                                 if(isInternal) {
                                     mConnectedThread.write("cmd1");
                                 }if(isExternal){
                                     mConnectedThread.write("cmd2");
+                                }if(isReset){
+                                    mConnectedThread.write("cmd3");
                                 }
                                 e.printStackTrace();
-                                Toast.makeText(getActivity(), e.getMessage() , Toast.LENGTH_LONG).show();            // update TextView
+//                                Toast.makeText(getActivity(), e.getMessage() , Toast.LENGTH_LONG).show();            // update TextView
                             }
                         }
                         break;
@@ -287,8 +298,10 @@ public class Sensing extends Fragment implements View.OnClickListener{
 
     public void reset(){
         try {
-            os.write("cmd3".getBytes(Charset.forName("UTF-8")));
+            mConnectedThread.write("cmd3");
+            isReset = true;
         } catch (Exception e) {
+            Toast.makeText(getActivity() , e.getMessage() , Toast.LENGTH_LONG).show();
             System.err.println("Can't send the data");
         }
     }
