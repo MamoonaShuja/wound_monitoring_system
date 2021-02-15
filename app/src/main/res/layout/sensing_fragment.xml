@@ -137,6 +137,37 @@
             android:gravity="center"
             />
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/feasWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/exWidget"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:background="@color/third_matching_color"
+            android:textColor="@color/white"
+            android:padding="10dp"
+            android:text="@string/fes"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:gravity="center"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text=""
+            android:id="@+id/fesRes"
+            android:layout_gravity="center"
+            android:gravity="center"
+            />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -153,8 +184,19 @@
             android:layout_weight="1"
             android:backgroundTint="@color/third_matching_color"
             android:text="@string/fes"
+            android:layout_marginRight="10dp"
             android:textColor="@color/white"
             android:id="@+id/fes"
+            android:padding="10dp"
+            />
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="@color/third_matching_color"
+            android:text="@string/chart"
+            android:textColor="@color/white"
+            android:id="@+id/chart"
             android:padding="10dp"
             />
     </LinearLayout>

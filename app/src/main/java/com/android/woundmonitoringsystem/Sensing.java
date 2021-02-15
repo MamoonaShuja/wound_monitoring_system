@@ -16,6 +16,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
@@ -65,12 +67,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Sensing extends Fragment implements View.OnClickListener{
+public class Sensing extends Fragment implements View.OnClickListener {
 
     Socket echoSocket = null;
-    String deviceAddress,deviceName;
+    String deviceAddress, deviceName, feas;
     DataOutputStream os = null;
-    LinearLayout inWidget , outWidget;
+    LinearLayout inWidget, outWidget;
     private boolean isBtConnected = false;
     private boolean isExternal = false;
     private boolean isInternal = false;
@@ -81,12 +83,12 @@ public class Sensing extends Fragment implements View.OnClickListener{
     AlertDialog alert;
     private RequestQueue mQueue;
     Helpers helpers;
-    Button bluetoothBtn , wifiBtn , feasibilityButton , resetButton , saveButton;
+    Button bluetoothBtn, wifiBtn, feasibilityButton, resetButton, saveButton, chartButton;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DevicesListAdapter mDeviceListAdapter;
     BluetoothAdapter mBluetoothAdapter;
     ListView lvNewDevices;
-    TextView externalRes , internalRes;
+    TextView externalRes, internalRes, fesRes;
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothSocket btSocket = null;
     private StringBuilder sb = new StringBuilder();
@@ -94,8 +96,9 @@ public class Sensing extends Fragment implements View.OnClickListener{
     private ConnectedThread mConnectedThread;
     final int RECIEVE_MESSAGE = 1;        // Status  for Handler
     StringBuilder messages;
-    SwitchMaterial internalSwitch , externalSwitch;
-    Float btmp , tmp , hmid , oxy , qual , con;
+    SwitchMaterial internalSwitch, externalSwitch;
+    Float btmp, tmp, hmid, oxy, qual, con;
+
     public static Sensing newInstance() {
         return new Sensing();
     }
@@ -117,12 +120,15 @@ public class Sensing extends Fragment implements View.OnClickListener{
         externalSwitch = view.findViewById(R.id.externalSwitch);
         externalRes = view.findViewById(R.id.externalRes);
         internalRes = view.findViewById(R.id.internalRes);
+        fesRes = view.findViewById(R.id.fesRes);
         resetButton = view.findViewById(R.id.reset);
         feasibilityButton = view.findViewById(R.id.fes);
         saveButton = view.findViewById(R.id.save);
         wifiBtn = view.findViewById(R.id.wifiBtn);
+        chartButton = view.findViewById(R.id.chart);
         helpers = new Helpers(getActivity());
 //        Setting on clik
+        chartButton.setOnClickListener(this);
         bluetoothBtn.setOnClickListener(this);
         feasibilityButton.setOnClickListener(this);
         saveButton.setOnClickListener(this);
@@ -132,15 +138,15 @@ public class Sensing extends Fragment implements View.OnClickListener{
         internalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if(isChecked){
-                    if(isBtConnected) {
+                if (isChecked) {
+                    if (isBtConnected) {
                         try {
                             mConnectedThread.write("cmd1");
                             isInternal = true;
-                        }catch (Exception e){
-                            Toast.makeText(getActivity() , e.getMessage() , Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+
                         }
-                    }else{
+                    } else {
                         try {
                             mConnectedThread.write("cmd1");
                             os.write("cmd1".getBytes(Charset.forName("UTF-8")));
@@ -148,7 +154,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
                             System.err.println("Can't send the data");
                         }
                     }
-                }else{
+                } else {
                     isInternal = false;
                 }
             }
@@ -156,13 +162,13 @@ public class Sensing extends Fragment implements View.OnClickListener{
 
         externalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     if (isBtConnected) {
                         try {
                             mConnectedThread.write("cmd2");
                             isExternal = true;
                         } catch (Exception e) {
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         try {
@@ -172,10 +178,12 @@ public class Sensing extends Fragment implements View.OnClickListener{
                             System.err.println("Can't send the data");
                         }
                     }
-                }else{
+                } else {
                     isExternal = false;
                 }
-            };
+            }
+
+            ;
         });
 
         handler = new Handler(new Handler.Callback() {
@@ -192,10 +200,10 @@ public class Sensing extends Fragment implements View.OnClickListener{
                         if (endOfLineIndex > 0) {                                            // if end-of-line,
                             String sbprint = sb.substring(0, endOfLineIndex);               // extract string
                             sb.delete(0, sb.length());                                      // and clear
-                            Toast.makeText(getActivity(), sbprint , Toast.LENGTH_LONG).show();            // update TextView
+//                            Toast.makeText(getActivity(), sbprint , Toast.LENGTH_LONG).show();            // update TextView
                             try {
                                 JSONObject jsonObject = new JSONObject(sbprint);
-                                if(isExternal) {
+                                if (isExternal) {
                                     tmp = Float.parseFloat(jsonObject.getString("temp"));
                                     qual = Float.parseFloat(jsonObject.getString("dden"));
                                     con = Float.parseFloat(jsonObject.getString("gcon"));
@@ -212,36 +220,38 @@ public class Sensing extends Fragment implements View.OnClickListener{
                                     outWidget.setVisibility(View.VISIBLE);
                                     loading.setVisibility(View.GONE);
                                     isExternal = false;
-                                }if(isInternal){
+                                }
+                                if (isInternal) {
                                     oxy = Float.parseFloat(jsonObject.getString("spo2"));
                                     btmp = Float.parseFloat(jsonObject.getString("btmp"));
                                     String btemp = "Body Temperature: " + jsonObject.getString("btmp");
                                     String hrtb = "HeartBeat: " + jsonObject.getString("hrtb");
                                     String spoTwo = "Oxygen: " + jsonObject.getString("spo2");
-                                    Spanned res = Html.fromHtml(btemp + "<br>"+hrtb+"<br>"+spoTwo);
+                                    Spanned res = Html.fromHtml(btemp + "<br>" + hrtb + "<br>" + spoTwo);
                                     internalRes.setText(res);
                                     internalSwitch.setChecked(false);
                                     inWidget.setVisibility(View.VISIBLE);
                                     outWidget.setVisibility(View.VISIBLE);
                                     loading.setVisibility(View.GONE);
                                     isInternal = false;
-                                }if(isReset){
-                                    String sts = jsonObject.getString("status");
-                                    if(sts.equals("ok")){
-                                        loading.setVisibility(View.GONE);
-                                        Toast.makeText(getActivity() , "Reset Successfully" , Toast.LENGTH_LONG).show();
-                                    }
+                                }
+                                if (isReset) {
+                                    loading.setVisibility(View.GONE);
+                                    Toast.makeText(getActivity(), "Reset Successfully", Toast.LENGTH_LONG).show();
+                                    bluetoothBtn.setClickable(true);
+                                    bluetoothBtn.setAlpha(1);
                                 }
                             } catch (JSONException e) {
-                                if(isInternal) {
+                                if (isInternal) {
                                     mConnectedThread.write("cmd1");
-                                }if(isExternal){
-                                    mConnectedThread.write("cmd2");
-                                }if(isReset){
-                                    mConnectedThread.write("cmd3");
                                 }
-                                e.printStackTrace();
-//                                Toast.makeText(getActivity(), e.getMessage() , Toast.LENGTH_LONG).show();            // update TextView
+                                if (isExternal) {
+                                    mConnectedThread.write("cmd2");
+                                }
+                                if (isReset) {
+                                    mConnectedThread.write("cmd3");
+                                    Toast.makeText(getActivity(), "Reset Successfully", Toast.LENGTH_LONG).show();
+                                }
                             }
                         }
                         break;
@@ -257,16 +267,16 @@ public class Sensing extends Fragment implements View.OnClickListener{
         super.onActivityCreated(savedInstanceState);
     }
 
-    public void serialCommunication(){
+    public void serialCommunication() {
         try {
             echoSocket = new Socket("192.168.4.1", 80);
             os = new DataOutputStream(echoSocket.getOutputStream());
             is = new DataInputStream(echoSocket.getInputStream());
         } catch (UnknownHostException e) {
-            Toast.makeText(getActivity() , "Host Not found" , Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Host Not found", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: Jatin");
-            Toast.makeText(getActivity() , "Couldn't get Input/Output for Connection" , Toast.LENGTH_SHORT).show();
+            System.err.println("Couldn't get I/O for the connection");
+            Toast.makeText(getActivity(), "Couldn't get Input/Output for Connection", Toast.LENGTH_SHORT).show();
 
         }
     }
@@ -274,11 +284,12 @@ public class Sensing extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        switch (id){
+        switch (id) {
             case R.id.bluBtn:
                 inWidget.setVisibility(View.GONE);
                 outWidget.setVisibility(View.GONE);
                 loading.setVisibility(View.VISIBLE);
+                checkState();
                 showBluetoothDevices();
                 break;
             case R.id.wifiBtn:
@@ -293,20 +304,34 @@ public class Sensing extends Fragment implements View.OnClickListener{
             case R.id.fes:
                 checkFeasibility();
                 break;
+            case R.id.chart:
+                showChart();
+                break;
         }
     }
 
-    public void reset(){
+    public void reset() {
         try {
             mConnectedThread.write("cmd3");
             isReset = true;
         } catch (Exception e) {
-            Toast.makeText(getActivity() , e.getMessage() , Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
             System.err.println("Can't send the data");
         }
     }
 
-    public void retryDialog(){
+    public void showChart() {
+
+        FragmentTransaction t = this.getFragmentManager().beginTransaction();
+        Fragment mFrag = new Chart();
+        Bundle args = new Bundle();
+        args.putString("feas", feas);
+        mFrag.setArguments(args);
+        t.replace(R.id.nav_host_fragment, mFrag);
+        t.commit();
+    }
+
+    public void retryDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(false);
         builder.setTitle("No Internet");
@@ -319,10 +344,9 @@ public class Sensing extends Fragment implements View.OnClickListener{
             }
         });
 
-        builder.setPositiveButton("Retry", new DialogInterface.OnClickListener(){
+        builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
+            public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 saveFeasibility();
             }
@@ -333,7 +357,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.error));
     }
 
-    public void saveFeasibility(){
+    public void saveFeasibility() {
         try {
             jsonBody = new JSONObject();
             jsonBody.put("hmid", hmid);
@@ -353,8 +377,8 @@ public class Sensing extends Fragment implements View.OnClickListener{
             public void onResponse(JSONObject response) {
                 try {
                     String res = response.getString("res");
-                    if(res.equals("1")){
-                        Toast.makeText(getActivity() , "Added Successfully" , Toast.LENGTH_LONG).show();
+                    if (res.equals("1")) {
+                        Toast.makeText(getActivity(), "Added Successfully", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -395,27 +419,40 @@ public class Sensing extends Fragment implements View.OnClickListener{
         mQueue.add(request);
     }
 
-    public void checkFeasibility(){
+    public void checkFeasibility() {
         String internalResText = internalRes.getText().toString().trim();
         String externalResText = externalRes.getText().toString().trim();
 
-        if(internalResText.equals("")){
-            Toast.makeText(getActivity() , "There is no values for Internal Body" , Toast.LENGTH_LONG).show();
+        if (internalResText.equals("")) {
+            Toast.makeText(getActivity(), "There is no values for Internal Body", Toast.LENGTH_LONG).show();
 
-        }else if(externalResText.equals("")){
-            Toast.makeText(getActivity() , "There is no values for External Environment" , Toast.LENGTH_LONG).show();
-        }else{
-        try {
-            String feas = helpers.FuzzyEngine(36.5 , 100 , 18 , 40 , 9 , 100);
-            Toast.makeText(getActivity() , feas  , Toast.LENGTH_LONG).show();
-
-        } catch (Exception e) {
-            Toast.makeText(getActivity() , e.getMessage() , Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+        } else if (externalResText.equals("")) {
+            Toast.makeText(getActivity(), "There is no values for External Environment", Toast.LENGTH_LONG).show();
+        } else {
+            try {
+                feas = helpers.FuzzyEngine(35.5, 60, 90, 30, 9, 100);
+                feasibilityButton.setClickable(false);
+                feasibilityButton.setAlpha((float) 0.3);
+                fesRes.setText(feas);
+            } catch (Exception e) {
+                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         }
     }
-    
+    public void checkState(){
+    if(mBluetoothAdapter ==null) {
+        Toast.makeText(getActivity() , "No Bluetooth" , Toast.LENGTH_LONG).show();
+    }
+
+    if(!mBluetoothAdapter.isEnabled()) {
+        Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivity(enableBTIntent);
+        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        requireActivity().registerReceiver(deviceOnOff , BTIntent);
+    }
+    showBluetoothDevices();
+}
     //Bluetooth Devices
     public void showBluetoothDevices(){
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -481,7 +518,25 @@ public class Sensing extends Fragment implements View.OnClickListener{
                     inWidget.setVisibility(View.VISIBLE);
                     outWidget.setVisibility(View.VISIBLE);
                 }
+        }
+    };
+    private final BroadcastReceiver deviceOnOff = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
+                switch(state){
+                    case BluetoothAdapter.STATE_OFF:
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        break;
+                }
             }
+        }
     };
 
     @Override
@@ -489,6 +544,7 @@ public class Sensing extends Fragment implements View.OnClickListener{
         super.onDestroy();
         if(isBtConnected) {
             requireActivity().unregisterReceiver(getDevices);
+            requireActivity().unregisterReceiver(deviceOnOff);
         }
     }
 

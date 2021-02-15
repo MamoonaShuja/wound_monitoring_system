@@ -47,7 +47,7 @@
     <string name="res">Reset</string>
     <string name="fes">Feasibility</string>
 
-<!--    Standards-->
+    <!--    Standards-->
 
     <string name="bst">Standard Body Temperature Range</string>
     <string name="std">Standard</string>
@@ -57,6 +57,7 @@
     <string name="fev">Fever/Hyperthermia</string>
     <string name="hype">Hyperpyrexia</string>
     <string name="cls">Class</string>
+    <string name="chart">Show Chart</string>
     <!--    Url-->
     <string name="url">http://coredev.codelab.pk/wms/api.php</string>
 </resources>
